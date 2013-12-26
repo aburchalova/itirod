@@ -37,15 +37,6 @@ public class Operation implements Callable<Boolean>{
         this.errors = new ArrayList<String>();
     }
 
-//    public static Operation createRandom(Client client, HasMoney moneySource, HasMoney moneyDest, int amount) {
-//        if (random.nextBoolean()) {
-//            return new DepositFromPurse(client, moneySource, moneyDest, amount);
-//        }
-//        else {
-//            return new WithdrawToPurse(client, account, amount);
-//        }
-//    }
-
     public int getAmount() {
         return amount;
     }

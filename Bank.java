@@ -7,6 +7,7 @@
  */
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Bank extends Observable{
     private List<Client> clients = new ArrayList<Client>(42);
@@ -14,6 +15,8 @@ public class Bank extends Observable{
 
     private Queue<Operation> queue = new ConcurrentLinkedQueue<Operation>();
     private ArrayList<Observer> observers = new ArrayList<Observer>();
+
+    private ReentrantLock cashiersLock = new ReentrantLock();
 
     public void createAccountForClient(Client client, int initialCash) {
         synchronized (getClients()) {
@@ -49,51 +52,19 @@ public class Bank extends Observable{
             return true;
         }
 
-        // if two clients are transferring money from same two accounts
-        // but 1st client is withdrawing from 1st acc
-        // and 2nd client is withdrawing from 2nd acc
-        // a deadlock will be
-        //
-        // So let's take as outer lock the one with lowest id.
-        // If operation is performed between client and account,
-        // client will be outer
-        HasMoney outerLock;
-        HasMoney innerLock;
-        if (outerLockOnSource(operation)) {
-            outerLock = operation.moneySource;
-            innerLock = operation.moneyDestination;
-        }
-        else {
-            innerLock = operation.moneySource;
-            outerLock = operation.moneyDestination;
-        }
-        synchronized (outerLock) {
-            synchronized (innerLock){
-                result =  operation.perform();
-                setChanged();
-                if (result) {
-                    for (Observer o: observers) {
-                        o.update(this, operation);
-                    }
-                }
-
+        result =  operation.perform();
+        setChanged();
+        if (result) {
+            for (Observer o: observers) {
+                o.update(this, operation);
             }
+
         }
         return result;
     }
 
-    //if source is client or source has lower id
-    protected boolean outerLockOnSource(Operation operation) {
-        Class sourceCl = operation.moneySource.getClass();
-        Class destCl = operation.moneyDestination.getClass();
-        if (sourceCl == Client.class) {
-            return true;
-        }
-        if (sourceCl == destCl) {
-            //return with lowest id
-            return operation.moneySource.getId() < operation.moneyDestination.getId();
-        }
-        return false;
+    public Integer getBalance(HasMoney hasMoney) {
+        return hasMoney.getMoney();
     }
 
     public List<Client> getClients() {
@@ -106,5 +77,14 @@ public class Bank extends Observable{
 
     public Queue<Operation> getQueue() {
         return queue;
+    }
+
+    public void lockTransactionStart() {
+        cashiersLock.lock();
+    }
+
+    public void unlockTransactionStart() {
+        cashiersLock.unlock();
+
     }
 }

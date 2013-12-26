@@ -11,4 +11,8 @@ public class Client extends HasMoney{
         super(id);
     }
 
+    public boolean wantToContinue(Operation operation, int sourceMoney) {
+        return operation.amount < sourceMoney;
+    }
+
 }

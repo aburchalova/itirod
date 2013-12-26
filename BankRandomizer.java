@@ -39,7 +39,7 @@ public class BankRandomizer {
     }
 
     public int randomOperationAmount() {
-        return random.nextInt(operationAmountLimit);
+        return random.nextInt(operationAmountLimit) + 1;
     }
 
     public static int getDefaultOperationAmountLimit() {

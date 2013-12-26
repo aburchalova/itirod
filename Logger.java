@@ -43,4 +43,8 @@ public class Logger {
 //        }
         stream.printf("processed clients: %d - %d, processed accounts: %d - %d\n", fpc, lpc, fpa, lpa);
     }
+
+    public void logRefuse(Operation operation, int sourceMoney) {
+        stream.printf("client refused to continue operation: %s (because balance %d)\n", operation, sourceMoney);
+    }
 }

@@ -16,7 +16,7 @@ import java.util.Random;
 
 public class Main {
     public static void main(String[] args) throws FileNotFoundException{
-        Logger logger = new Logger(new PrintStream(new FileOutputStream("bank_output13")));
+        Logger logger = new Logger(new PrintStream(new FileOutputStream("bank_output15")));
         Bank bank = new Bank();
         BankRandomizer randomizer = new BankRandomizer(bank);
 

@@ -23,11 +23,29 @@ public class Cashier extends Thread {
                 }
                 Operation operation = bank.getQueue().remove();
                 Thread.sleep(1000);
-                boolean success = bank.performOperation(operation);
-                logger.logOperation(operation, success);
+
+                Transaction tx = new Transaction(operation);
+                bank.lockTransactionStart();
+                synchronized (tx.outerLock) {
+                    synchronized (tx.innerLock) {
+                        bank.unlockTransactionStart();
+
+                        //simulating the client asking for balance
+                        int money = bank.getBalance(operation.getMoneySource());
+                        if (!operation.initiator.wantToContinue(operation, money)) {
+                            logger.logRefuse(operation, money);
+                            continue;
+                        }
+                        boolean success = bank.performOperation(operation);
+                        logger.logOperation(operation, success);
+                    }
+                }
+
             } catch (InterruptedException e) {
                 break;
             }
         }
     }
+
+
 }
